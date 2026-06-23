@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Resource Hub</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:#ffffff;
+    color:#111827;
+    min-height:100vh;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.header h1{
+    font-size:2.8rem;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.header p{
+    color:#6b7280;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-2px);
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-family:inherit;
+    font-size:14px;
+}
+
+textarea{
+    resize:vertical;
+}
+
+button{
+    background:#111827;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+.section-title{
+    margin-bottom:20px;
+    font-size:1.3rem;
+    font-weight:600;
+}
+
+.filters{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+    margin-top:30px;
+    margin-bottom:30px;
+}
+
+.resource-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:20px;
+}
+
+.resource-card{
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:20px;
+    transition:.3s;
+}
+
+.resource-card:hover{
+    border-color:#cbd5e1;
+    transform:translateY(-3px);
+}
+
+.badge{
+    display:inline-block;
+    padding:6px 12px;
+    background:#f3f4f6;
+    border-radius:999px;
+    font-size:12px;
+    margin-bottom:12px;
+}
+
+.resource-title{
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.meta{
+    font-size:13px;
+    color:#6b7280;
+    margin-bottom:5px;
+}
+
+.resource-link{
+    display:inline-block;
+    margin-top:15px;
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:500;
+}
+
+.resource-link:hover{
+    text-decoration:underline;
+}
+
+.empty{
+    text-align:center;
+    color:#9ca3af;
+    padding:40px;
+}
+
+@media(max-width:768px){
+    .header h1{
+        font-size:2rem;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Study Resource Hub</h1>
+        <p>Organize and share exam preparation resources with your team.</p>
+    </div>
+
+    <div class="card">
+
+        <h2 class="section-title">Add New Resource</h2>
+
+        <form id="resourceForm">
+
+            <div class="form-grid">
+
+                <input
+                    type="text"
+                    id="title"
+                    placeholder="Resource Title"
+                    required
+                >
+
+                <input
+                    type="url"
+                    id="link"
+                    placeholder="Resource URL"
+                    required
+                >
+
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option>Banking</option>
+                    <option>SSC</option>
+                    <option>RRB</option>
+                    <option>SI Constable</option>
+                    <option></option>
+                </select>
+
+                <select id="uploader" required>
+                    <option value="">Select Uploader</option>
+                    <option>Yogesh</option>
+                    <option>Arjun</option>
+                    <option>Sunil</option>
+                    <option>Hayee</option>
+                </select>
+
+            </div>
+
+            <br>
+
+            <textarea
+                id="description"
+                rows="3"
+                placeholder="Description (Optional)"
+            ></textarea>
+
+            <br><br>
+
+            <button type="submit">
+                Add Resource
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="filters">
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Search resources..."
+        >
+
+        <select id="filterCategory">
+            <option value="">All Categories</option>
+            <option>Banking</option>
+            <option>SSC</option>
+            <option>RRB</option>
+            <option>Other</option>
+        </select>
+
+        <select id="filterUploader">
+            <option value="">All Uploaders</option>
+            <option>Yogesh</option>
+            <option>Arjun</option>
+            <option>Sunil</option>
+            <option>Amol</option>
+        </select>
+
+    </div>
+
+    <div id="resourceContainer" class="resource-grid"></div>
+
+</div>
+
+<script>
+const form = document.getElementById("resourceForm");
+const resourceContainer = document.getElementById("resourceContainer");
+
+const searchInput = document.getElementById("search");
+const filterCategory = document.getElementById("filterCategory");
+const filterUploader = document.getElementById("filterUploader");
+
+let resources =
+JSON.parse(localStorage.getItem("studyResources")) || [];
+
+function saveResources(){
+    localStorage.setItem(
+        "studyResources",
+        JSON.stringify(resources)
+    );
+}
+
+form.addEventListener("submit",(e)=>{
+    e.preventDefault();
+
+    const resource = {
+        title: document.getElementById("title").value,
+        link: document.getElementById("link").value,
+        category: document.getElementById("category").value,
+        uploader: document.getElementById("uploader").value,
+        description: document.getElementById("description").value,
+        date: new Date().toLocaleDateString()
+    };
+
+    resources.unshift(resource);
+
+    saveResources();
+    renderResources();
+
+    form.reset();
+});
+
+function renderResources(){
+
+    const search =
+    searchInput.value.toLowerCase();
+
+    const category =
+    filterCategory.value;
+
+    const uploader =
+    filterUploader.value;
+
+    const filtered = resources.filter(item=>{
+
+        const matchSearch =
+        item.title.toLowerCase().includes(search);
+
+        const matchCategory =
+        !category ||
+        item.category === category;
+
+        const matchUploader =
+        !uploader ||
+        item.uploader === uploader;
+
+        return (
+            matchSearch &&
+            matchCategory &&
+            matchUploader
+        );
+
+    });
+
+    if(filtered.length===0){
+
+        resourceContainer.innerHTML=
+        `
+        <div class="empty">
+            No resources found.
+        </div>
+        `;
+
+        return;
+    }
+
+    resourceContainer.innerHTML=
+    filtered.map(item=>`
+
+        <div class="resource-card">
+
+            <div class="badge">
+                ${item.category}
+            </div>
+
+            <div class="resource-title">
+                ${item.title}
+            </div>
+
+            <div class="meta">
+                Uploaded by: ${item.uploader}
+            </div>
+
+            <div class="meta">
+                Added: ${item.date}
+            </div>
+
+            ${
+                item.description
+                ?
+                `<p style="margin-top:12px;color:#4b5563;">
+                    ${item.description}
+                </p>`
+                :
+                ""
+            }
+
+            <a
+                href="${item.link}"
+                target="_blank"
+                class="resource-link"
+            >
+                Open Resource →
+            </a>
+
+        </div>
+
+    `).join("");
+}
+
+searchInput.addEventListener(
+"input",
+renderResources
+);
+
+filterCategory.addEventListener(
+"change",
+renderResources
+);
+
+filterUploader.addEventListener(
+"change",
+renderResources
+);
+
+renderResources();
+</script>
+
+</body>
+</html>
