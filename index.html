@@ -205,15 +205,15 @@ button:hover{
                     <option>SSC</option>
                     <option>RRB</option>
                     <option>SI Constable</option>
-                    <option></option>
+                    <option>Others</option>
                 </select>
 
                 <select id="uploader" required>
                     <option value="">Select Uploader</option>
-                    <option>Yogesh</option>
+                    <option>Yogesh (Admin)</option>
                     <option>Arjun</option>
                     <option>Sunil</option>
-                    <option>Hayee</option>
+                    <option>Amol</option>
                 </select>
 
             </div>
@@ -255,10 +255,10 @@ button:hover{
 
         <select id="filterUploader">
             <option value="">All Uploaders</option>
-            <option>Yogesh</option>
+            <option>Yogesh (Admin)</option>
             <option>Arjun</option>
             <option>Sunil</option>
-            <option>Hayee</option>
+            <option>Amol</option>
         </select>
 
     </div>
@@ -463,23 +463,7 @@ function renderResources() {
 
 }
 
-searchInput.addEventListener(
-  "input",
-  renderResources
-);
-
-filterCategory.addEventListener(
-  "change",
-  renderResources
-);
-
-filterUploader.addEventListener(
-  "change",
-  renderResources
-);
-
 loadResources();
-
 </script>
 
 
