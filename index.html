@@ -267,7 +267,28 @@ button:hover{
 
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDYjrvsb0b3z1xyXaCzZrAxhwH2vlPrk1M",
+  authDomain: "study-resource-hub-8acd5.firebaseapp.com",
+  projectId: "study-resource-hub-8acd5",
+  storageBucket: "study-resource-hub-8acd5.firebasestorage.app",
+  messagingSenderId: "1001304995808",
+  appId: "1:1001304995808:web:4eeb9fa2c3a579b3a8dd85"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const form = document.getElementById("resourceForm");
 const resourceContainer = document.getElementById("resourceContainer");
 
@@ -275,141 +296,169 @@ const searchInput = document.getElementById("search");
 const filterCategory = document.getElementById("filterCategory");
 const filterUploader = document.getElementById("filterUploader");
 
-let resources =
-JSON.parse(localStorage.getItem("studyResources")) || [];
+let resources = [];
 
-function saveResources(){
-    localStorage.setItem(
-        "studyResources",
-        JSON.stringify(resources)
-    );
+async function loadResources() {
+
+  const snapshot = await getDocs(
+    query(collection(db, "resources"))
+  );
+
+  resources = [];
+
+  snapshot.forEach((doc) => {
+    resources.push(doc.data());
+  });
+
+  resources.sort(
+    (a, b) =>
+      new Date(b.createdAt) -
+      new Date(a.createdAt)
+  );
+
+  renderResources();
 }
 
-form.addEventListener("submit",(e)=>{
-    e.preventDefault();
+form.addEventListener("submit", async (e) => {
 
-    const resource = {
-        title: document.getElementById("title").value,
-        link: document.getElementById("link").value,
-        category: document.getElementById("category").value,
-        uploader: document.getElementById("uploader").value,
-        description: document.getElementById("description").value,
-        date: new Date().toLocaleDateString()
-    };
+  e.preventDefault();
 
-    resources.unshift(resource);
+  const resource = {
+    title: document.getElementById("title").value,
+    link: document.getElementById("link").value,
+    category: document.getElementById("category").value,
+    uploader: document.getElementById("uploader").value,
+    description: document.getElementById("description").value,
+    date: new Date().toLocaleDateString(),
+    createdAt: new Date().toISOString()
+  };
 
-    saveResources();
-    renderResources();
+  try {
+
+    await addDoc(
+      collection(db, "resources"),
+      resource
+    );
 
     form.reset();
+
+    await loadResources();
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Failed to save resource.");
+
+  }
+
 });
 
-function renderResources(){
+function renderResources() {
 
-    const search =
+  const search =
     searchInput.value.toLowerCase();
 
-    const category =
+  const category =
     filterCategory.value;
 
-    const uploader =
+  const uploader =
     filterUploader.value;
 
-    const filtered = resources.filter(item=>{
+  const filtered = resources.filter(item => {
 
-        const matchSearch =
-        item.title.toLowerCase().includes(search);
+    const matchSearch =
+      item.title
+      .toLowerCase()
+      .includes(search);
 
-        const matchCategory =
-        !category ||
-        item.category === category;
+    const matchCategory =
+      !category ||
+      item.category === category;
 
-        const matchUploader =
-        !uploader ||
-        item.uploader === uploader;
+    const matchUploader =
+      !uploader ||
+      item.uploader === uploader;
 
-        return (
-            matchSearch &&
-            matchCategory &&
-            matchUploader
-        );
+    return (
+      matchSearch &&
+      matchCategory &&
+      matchUploader
+    );
 
-    });
+  });
 
-    if(filtered.length===0){
+  if (filtered.length === 0) {
 
-        resourceContainer.innerHTML=
-        `
-        <div class="empty">
-            No resources found.
+    resourceContainer.innerHTML = `
+      <div class="empty">
+        No resources found.
+      </div>
+    `;
+
+    return;
+  }
+
+  resourceContainer.innerHTML =
+    filtered.map(item => `
+
+      <div class="resource-card">
+
+        <div class="badge">
+          ${item.category}
         </div>
-        `;
 
-        return;
-    }
-
-    resourceContainer.innerHTML=
-    filtered.map(item=>`
-
-        <div class="resource-card">
-
-            <div class="badge">
-                ${item.category}
-            </div>
-
-            <div class="resource-title">
-                ${item.title}
-            </div>
-
-            <div class="meta">
-                Uploaded by: ${item.uploader}
-            </div>
-
-            <div class="meta">
-                Added: ${item.date}
-            </div>
-
-            ${
-                item.description
-                ?
-                `<p style="margin-top:12px;color:#4b5563;">
-                    ${item.description}
-                </p>`
-                :
-                ""
-            }
-
-            <a
-                href="${item.link}"
-                target="_blank"
-                class="resource-link"
-            >
-                Open Resource →
-            </a>
-
+        <div class="resource-title">
+          ${item.title}
         </div>
+
+        <div class="meta">
+          Uploaded by: ${item.uploader}
+        </div>
+
+        <div class="meta">
+          Added: ${item.date}
+        </div>
+
+        ${item.description
+          ? `<p style="margin-top:12px;color:#4b5563;">
+              ${item.description}
+            </p>`
+          : ""
+        }
+
+        <a
+          href="${item.link}"
+          target="_blank"
+          class="resource-link"
+        >
+          Open Resource →
+        </a>
+
+      </div>
 
     `).join("");
+
 }
 
 searchInput.addEventListener(
-"input",
-renderResources
+  "input",
+  renderResources
 );
 
 filterCategory.addEventListener(
-"change",
-renderResources
+  "change",
+  renderResources
 );
 
 filterUploader.addEventListener(
-"change",
-renderResources
+  "change",
+  renderResources
 );
 
-renderResources();
+loadResources();
+
 </script>
+
 
 </body>
 </html>
