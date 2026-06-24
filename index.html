@@ -463,6 +463,32 @@ function renderResources() {
 
 }
 
+
+window.deleteResource = async function(id){
+
+  const confirmDelete = confirm(
+    "Delete this resource?"
+  );
+
+  if(!confirmDelete) return;
+
+  try{
+
+    await deleteDoc(
+      doc(db,"resources",id)
+    );
+
+    await loadResources();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to delete resource");
+
+  }
+
+}
+
 loadResources();
 </script>
 
